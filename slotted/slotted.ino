@@ -28,10 +28,14 @@ int circum = 180;
 
 int ticks_per_revo = 30;
 
-int sen_pin = 20; //pin has to be 2, 3, 18, 19, 20, 21 on the mega
+int sen_pin_x = 20; //pin has to be 2, 3, 18, 19, 20, 21 on the mega
+int sen_pin_y =
 
-volatile int encoder_ticks = 0;
-int current_tick;
+volatile int encoder_ticks_x = 0;
+int current_tick_x;
+
+volatile int encoder_ticks_y = 0;
+int current_tick_y;
 
 int i = 0;
 
@@ -42,18 +46,36 @@ int pos = 0;
 
 
 ////////////////////////////////////////// COUNTING TICKS ////////////////////////////////////////////
-void count() {
-  Serial.println(encoder_ticks);
+void count_x() {
+  Serial.println(encoder_ticks_x);
   volatile byte state = LOW;
-  encoder_ticks += 1;
+  encoder_ticks_x += 1;
 }
 
-int readEncoder() {
-  noInterrupts();
-  int current_tick = encoder_ticks;
-  interrupts();
+void count_y() {
+  Serial.println(encoder_ticks_y);
+  volatile byte state = LOW;
+  encoder_ticks_y += 1;
+}
 
-  return current_tick;
+int readEncoder(char axis) {
+  noInterrupts();
+  if (axis == "x"){
+
+    int current_tick_x = encoder_ticks_x;
+
+    interrupts();
+
+    return current_tick_x;
+  }
+  else if (axis == "y") {
+    int current_tick_x = encoder_ticks_y
+      
+    interrupts();
+
+    return current_tick_y;
+  }
+
 }
 
 int num_ticks(int distance) { //on god pls provide milimeters
@@ -64,7 +86,7 @@ int num_ticks(int distance) { //on god pls provide milimeters
 void forward(int distance) {
   int target_ticks = num_ticks(distance);
   Serial.println(target_ticks);
-  encoder_ticks = 0;
+  encoder_ticks_x = 0;
   //motor 1
   analogWrite(encoder2_ena, motorSpeed);
   digitalWrite(encoder2_in1, HIGH);
@@ -85,8 +107,8 @@ void forward(int distance) {
   digitalWrite(encoder1_in3, HIGH);
   digitalWrite(encoder1_in4, LOW);
 
-  while (current_tick < target_ticks) {
-    current_tick = readEncoder();
+  while (current_tick_x < target_ticks) {
+    current_tick_x = readEncoder("x");
   }
   Serial.println("DONE");
   delay(100);
@@ -96,7 +118,7 @@ void forward(int distance) {
 void backward(int distance) {
   int target_ticks = num_ticks(distance);
   Serial.println(target_ticks);
-  encoder_ticks = 0;
+  encoder_ticks_x = 0;
 
   // motor 1
   analogWrite(encoder2_ena, motorSpeed);
@@ -118,7 +140,7 @@ void backward(int distance) {
   digitalWrite(encoder1_in4, HIGH);
   digitalWrite(encoder1_in3, LOW);
 
-  while (current_tick < target_ticks) {
+  while (current_tick_x < target_ticks) {
     current_tick = readEncoder();
   }
   Serial.println("DONE");
@@ -129,7 +151,7 @@ void backward(int distance) {
 void to_one_side(int distance) {
   int target_ticks = num_ticks(distance);
   Serial.println(target_ticks);
-  encoder_ticks = 0;
+  encoder_ticks_y = 0;
 
   // motor 1
   analogWrite(encoder2_ena, motorSpeed);
@@ -151,8 +173,8 @@ void to_one_side(int distance) {
   digitalWrite(encoder1_in4, HIGH);
   digitalWrite(encoder1_in3, LOW);
 
-  while (current_tick < target_ticks) {
-    current_tick = readEncoder();
+  while (current_tick_y < target_ticks) {
+    current_tick_y = readEncoder("y");
   }
   Serial.println("DONE");
   delay(100);
@@ -162,7 +184,7 @@ void to_one_side(int distance) {
 void to_the_other_side(int distance) {
   int target_ticks = num_ticks(distance);
   Serial.println(target_ticks);
-  encoder_ticks = 0;
+  encoder_ticks_y = 0;
 
   // motor 1
   analogWrite(encoder2_ena, motorSpeed);
@@ -184,8 +206,8 @@ void to_the_other_side(int distance) {
   digitalWrite(encoder1_in3, HIGH);
   digitalWrite(encoder1_in4, LOW);
 
-  while (current_tick < target_ticks) {
-    current_tick = readEncoder();
+  while (current_tick_y < target_ticks) {
+    current_tick_y = readEncoder("y");
   }
   Serial.println("DONE");
   delay(100);
@@ -213,7 +235,8 @@ void setup() {
   //Count ticks
   Serial.begin(9600);
   pinMode(sen_pin, INPUT);
-  attachInterrupt(digitalPinToInterrupt(sen_pin), count, FALLING);
+  attachInterrupt(digitalPinToInterrupt(sen_pin_x), count_x, FALLING);
+  attachInterrupt(digitalPinToInterrupt(sen_pin_y), count_y, FALLING);
 
   //Moving
   pinMode(encoder1_in1, OUTPUT);
