@@ -44,6 +44,8 @@ Servo myservo;
 
 int pos = 0;
 
+////////////////////////////////////////// PHOTO-RESISTOR /////////////////////////////////////////////
+const int PHOTORESISTOR_PIN = A0;
 
 ////////////////////////////////////////// COUNTING TICKS ////////////////////////////////////////////
 void count_x() {
@@ -232,6 +234,9 @@ void stop() {
 
 //////////////////////////////////////////////////////// SETUP AND LOOP /////////////////////////////////////////////////////////////////
 void setup() {
+  //Photo-resistor
+  pinMode(PHOTORESISTOR_PIN, INPUT);
+
   //Count ticks
   Serial.begin(9600);
   pinMode(sen_pin, INPUT);
@@ -254,16 +259,23 @@ void setup() {
 }
 
 void loop() {
-  int ticks = digitalRead(sen_pin);
+  int lightLevel = analogRead(PHOTORESISTOR_PIN);
 
-  if (i == 0) {
-    forward(180);
-    // backward(180);
-    // Serial.println("in loop");
-  }
-  else if (i != 0){
-    Serial.println("loop ended");
+  if (lightLevel > 1000){
+
+    int ticks = digitalRead(sen_pin);
+
+    if (i == 0) {
+      forward(180);
+      // backward(180);
+      // Serial.println("in loop");
+    }
+    else if (i != 0){
+      Serial.println("loop ended");
+    }
+
+    i++;
   }
 
-  i++;
+
 }
