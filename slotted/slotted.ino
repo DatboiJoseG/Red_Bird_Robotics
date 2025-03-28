@@ -29,7 +29,7 @@ int circum = 180;
 int ticks_per_revo = 30;
 
 int sen_pin_x = 20; //pin has to be 2, 3, 18, 19, 20, 21 on the mega
-int sen_pin_y =
+int sen_pin_y = 21;
 
 volatile int encoder_ticks_x = 0;
 int current_tick_x;
@@ -71,7 +71,7 @@ int readEncoder(char axis) {
     return current_tick_x;
   }
   else if (axis == "y") {
-    int current_tick_x = encoder_ticks_y
+    int current_tick_y = encoder_ticks_y;
       
     interrupts();
 
@@ -143,7 +143,7 @@ void backward(int distance) {
   digitalWrite(encoder1_in3, LOW);
 
   while (current_tick_x < target_ticks) {
-    current_tick = readEncoder();
+    current_tick_x = readEncoder("x");
   }
   Serial.println("DONE");
   delay(100);
@@ -239,7 +239,8 @@ void setup() {
 
   //Count ticks
   Serial.begin(9600);
-  pinMode(sen_pin, INPUT);
+  pinMode(sen_pin_x, INPUT);
+  pinMode(sen_pin_y, INPUT);
   attachInterrupt(digitalPinToInterrupt(sen_pin_x), count_x, FALLING);
   attachInterrupt(digitalPinToInterrupt(sen_pin_y), count_y, FALLING);
 
@@ -261,9 +262,9 @@ void setup() {
 void loop() {
   int lightLevel = analogRead(PHOTORESISTOR_PIN);
 
-  if (lightLevel > 1000){
+  if (lightLevel > 800){
 
-    int ticks = digitalRead(sen_pin);
+    int ticks = digitalRead(sen_pin_x);
 
     if (i == 0) {
       forward(180);
